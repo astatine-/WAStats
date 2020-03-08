@@ -5,11 +5,18 @@
 *.so
 *.dylib
 
+
 # Test binary, built with `go test -c`
 *.test
+__debug_bin
+go.sum
+.vscode
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+#generated PDFs
+*.pdf
 
 # Dependency directories (remove the comment below to include it)
 # vendor/

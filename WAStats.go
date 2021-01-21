@@ -16,7 +16,7 @@ var runTimestamp string
 var docTitle string
 var tslayout string
 
-const verString = "1.010"
+const verString = "1.11"
 
 func main() {
 	var allContent string

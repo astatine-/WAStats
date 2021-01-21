@@ -14,19 +14,21 @@ import (
 
 var runTimestamp string
 var docTitle string
+var tslayout string
 
-const verString = "1.09"
+const verString = "1.010"
 
 func main() {
 	var allContent string
 
-	fmt.Print("WAStats v" + verString + " - WhatsApp message statistics\n(c) 2018-20, Arun Tanksali. All rights reserved\n\n")
+	fmt.Print("WAStats v" + verString + " - WhatsApp message statistics\n(c) 2018-21, Arun Tanksali. All rights reserved\n\n")
 	osptr := flag.String("os", "Android", "-os Android or -os iOS")
 	fptr := flag.String("db", "", "WhatsApp data export file, with full path")
 	titleptr := flag.String("title", "none", "-title document-title")
 	verptr := flag.Int("ver", 0, "-ver dataver either 18 or 20")
 	fromptr := flag.String("from", "01/01/2000", "-from dd/mm/yyyy")
 	toptr := flag.String("to", "01/01/2100", "-to dd/mm/yyyy")
+	layoutptr := flag.String("layout", "none", "-layout golang_tslayout")
 
 	flag.Parse()
 
@@ -37,6 +39,7 @@ func main() {
 		println("-title <title> : Optional : this is the title that will be used in the report and in the output filename")
 		println("-ver <Android ver> : Optional : Specify 18 as the value if and Android file is not processed")
 		println("-from and -to : Optional : Select messages from a period to process. Format DD/MM/YYYY")
+		println("-layout <GOLANG style timestamp layout> : Optional")
 		return
 	}
 
@@ -44,6 +47,12 @@ func main() {
 		docTitle = *fptr
 	} else {
 		docTitle = *titleptr
+	}
+
+	if *layoutptr == "none" {
+		tslayout = "default"
+	} else {
+		tslayout = *layoutptr
 	}
 
 	version := 0
@@ -70,14 +79,15 @@ func main() {
 	fromdate, _ := time.Parse("02/01/2006", *fromptr)
 	todate, _ := time.Parse("02/01/2006", *toptr)
 
+
 	s := bufio.NewScanner(f)
 	allok := false
 	for s.Scan() {
 		var msgDate, msgTime, msgSender, msgType, msgContent string
 		if *osptr == "Android" {
-			allok, msgDate, msgTime, msgSender, msgType, msgContent = parseAndroid(s.Text(), version, fromdate, todate)
+			allok, msgDate, msgTime, msgSender, msgType, msgContent = parseAndroid(s.Text(), version, fromdate, todate, tslayout)
 		} else {
-			allok, msgDate, msgTime, msgSender, msgType, msgContent = parseiOS(s.Text(), fromdate, todate)
+			allok, msgDate, msgTime, msgSender, msgType, msgContent = parseiOS(s.Text(), fromdate, todate, tslayout)
 		}
 		if allok && (msgType == "Text" || msgType == "Media" || msgType == "Link") {
 			insertWAM("1", msgDate, msgTime, msgType, msgSender)

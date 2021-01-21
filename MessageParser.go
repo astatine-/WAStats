@@ -8,7 +8,7 @@ import (
 func inTimeSpan(start, end, check time.Time) bool {
 	return check.After(start) && check.Before(end)
 }
-func parseAndroid(msgline string, version int, fromdate, todate time.Time) (bool, string, string, string, string, string) {
+func parseAndroid(msgline string, version int, fromdate, todate time.Time, tslayout string) (bool, string, string, string, string, string) {
 
 	var msgDate, msgTime, msgSender, msgType, msgContent string
 
@@ -21,14 +21,22 @@ func parseAndroid(msgline string, version int, fromdate, todate time.Time) (bool
 
 	//7/18/18, 10:04 PM
 	//	Mon Jan 2 15:04:05 -0700 MST 2006
-	//	0   1   2  3  4  5              6
+	//	0   1   2  3  4  5
 	layout := "02/01/2006, 3:04 pm" // changed from "1/2/06, 3:04 PM" on 12 Jan 2020
-	if version == 18 {
-		layout = "1/2/06, 3:04 PM" // changed from "1/2/06, 3:04 PM" on 12 Jan 2020
+	if tslayout == "default" {
+		if version == 18 {
+			layout = "1/2/06, 3:04 PM" // changed from "1/2/06, 3:04 PM" on 12 Jan 2020
+		}
+		if version == 01 {
+			layout = "2/1/06, 3:04 pm" // changed from "1/2/06, 3:04 PM" on 12 Jan 2020
+		}
+		if version == 24 {
+			layout = "2/1/06, 15:04" // changed from "1/2/06, 3:04 PM" on 12 Jan 2020
+		}
+	} else {
+		layout = tslayout // user has given the layout string in proper format
 	}
-	if version == 01 {
-		layout = "2/1/06, 3:04 pm" // changed from "1/2/06, 3:04 PM" on 12 Jan 2020
-	}
+
 	dash := strings.Index(msgline, " - ")
 	if dash != -1 {
 		tst := msgline[:dash]
@@ -99,7 +107,7 @@ func parseAndroid(msgline string, version int, fromdate, todate time.Time) (bool
 	return true, msgDate, msgTime, msgSender, msgType, msgContent
 }
 
-func parseiOS(msgline string, fromdate, todate time.Time) (bool, string, string, string, string, string) {
+func parseiOS(msgline string, fromdate, todate time.Time, tslayout string) (bool, string, string, string, string, string) {
 
 	var msgDate, msgTime, msgSender, msgType, msgContent string
 
@@ -112,6 +120,9 @@ func parseiOS(msgline string, fromdate, todate time.Time) (bool, string, string,
 
 	//[01/08/13, 9:49:19 AM]
 	layout := "2/1/06, 3:04:05 PM"
+	if tslayout != "default" {
+		layout = tslayout // user has given the layout string in proper format
+	}
 	//fmt.Println(msgline)
 	dash := strings.Index(msgline, "] ")
 	if dash != -1 {
